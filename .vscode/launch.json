@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "attach to renode",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/build/Debug/target/target.elf",
+      "args": [],
+      "svdPath": "${workspaceRoot}/STM32F446.svd",
+      "stopAtEntry": true,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "arm-none-eabi-gdb",
+      "miDebuggerServerAddress": "localhost:1235"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Filename: renode-config.resc
+$bin = "C:/_git/renode_stm32/build/Debug/target/target.elf"
+
+# Create Machine & Load config
+mach create
+machine LoadPlatformDescription "C:/_git/renode_stm32/stm32f4.repl"
+
+# Enable Function Tracking
+# sysbus.cpu LogFunctionNames true
+sysbus LogAllPeripheralsAccess true
+# gpioPortC LogRegisterWrite true
+
+macro reset
+"""
+    sysbus LoadELF $bin
+"""
+
+runMacro $reset
+
+machine StartGdbServer 1235 true
+start

@@ -1,0 +1,12 @@
+CompileFlags:
+  Add: [-std=c++23]
+  CompilationDatabase: build/Debug
+Diagnostics:
+  ClangTidy:
+    Remove: [modernize-*]
+
+Index:
+  Background: Build
+
+InlayHints:
+  Enabled: true
