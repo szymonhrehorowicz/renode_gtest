@@ -1,6 +1,6 @@
 CompileFlags:
   Add: [-std=c++23]
-  CompilationDatabase: build/Debug
+  CompilationDatabase: build/tests
 Diagnostics:
   ClangTidy:
     Remove: [modernize-*]

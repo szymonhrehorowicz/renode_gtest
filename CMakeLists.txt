@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-project(rtos_project NONE)
+
+project(rtos_project LANGUAGES C CXX)
 
 # ---------------------------------------------------------
 # Options
@@ -7,53 +8,53 @@ project(rtos_project NONE)
 option(BUILD_SIM "Build firmware with Renode simulation flags" OFF)
 
 # ---------------------------------------------------------
-# Add STM32 firmware project
+# Add STM32 firmware project (only when cross-compiling)
 # ---------------------------------------------------------
-add_subdirectory(target)
+if(CMAKE_CROSSCOMPILING OR BUILD_SIM)
+    add_subdirectory(target)
+endif()
 
 if(BUILD_SIM)
     target_compile_definitions(target PRIVATE RENODE_SIMULATION)
 endif()
 
 # ---------------------------------------------------------
-# Custom targets (Makefile equivalents)
+# Add host-side tests (always)
+# ---------------------------------------------------------
+if(NOT BUILD_SIM)
+add_subdirectory(tests)
+endif()
+# ---------------------------------------------------------
+# Custom targets
 # ---------------------------------------------------------
 
-# build
 add_custom_target(build
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     COMMENT "Building firmware"
 )
 
-# rebuild
 add_custom_target(rebuild
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     COMMENT "Rebuilding firmware"
 )
 
-# build-sim (no reconfigure!)
 add_custom_target(build-sim
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target target
-    COMMENT "Building firmware for Renode simulation (BUILD_SIM must be set during configuration)"
+    COMMENT "Building firmware for Renode simulation"
 )
 
-
-# run-sim
 add_custom_target(run-sim
     COMMAND renode ${CMAKE_SOURCE_DIR}/test.resc
     COMMENT "Launching Renode simulation"
 )
 
-# clean
 add_custom_target(clean-all
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
     COMMENT "Cleaning build directory"
 )
 
-# test
-add_custom_target(test
-    COMMAND echo "Running Renode tests..."
-    COMMAND renode-test ${CMAKE_SOURCE_DIR}/tests/test-button.robot
-    COMMENT "Executing Renode Robot tests"
+add_custom_target(integration-tests
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target integration_tests
+    COMMENT "Building GoogleTest integration tests"
 )

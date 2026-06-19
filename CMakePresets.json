@@ -1,38 +1,79 @@
 {
-    "version": 3,
-    "configurePresets": [
-        {
-            "name": "default",
-            "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
-		    "toolchainFile": "${sourceDir}/target/cmake/gcc-arm-none-eabi.cmake",
-            "cacheVariables": {
-            }
-        },
-        {
-            "name": "Debug",
-            "inherits": "default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "Release",
-            "inherits": "default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+  "version": 3,
+
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "fw-base",
+      "inherits": "base",
+      "hidden": true,
+      "toolchainFile": "${sourceDir}/target/cmake/gcc-arm-none-eabi.cmake"
+    },
+    {
+      "name": "fw-Debug",
+      "inherits": "fw-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_SIM": "OFF"
+      }
+    },
+    {
+      "name": "fw-Release",
+      "inherits": "fw-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_SIM": "OFF"
+      }
+    },
+    {
+      "name": "fw-Sim",
+      "inherits": "fw-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_SIM": "ON"
+      }
+    },
+    {
+        "name": "host-base",
+        "inherits": "base",
+        "hidden": true,
+        "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "cacheVariables": {
+            "CMAKE_C_COMPILER": "$env{LLVM_ROOT}/bin/clang-cl.exe",
+            "CMAKE_CXX_COMPILER": "$env{LLVM_ROOT}/bin/clang-cl.exe"
         }
-    ],
-    "buildPresets": [
-        {
-            "name": "Debug",
-            "configurePreset": "Debug"
         },
         {
-            "name": "Release",
-            "configurePreset": "Release"
+        "name": "tests",
+        "inherits": "host-base",
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug"
         }
-    ]
+        }
+  ],
+
+  "buildPresets": [
+    { "name": "fw-Debug", "configurePreset": "fw-Debug" },
+    { "name": "fw-Release", "configurePreset": "fw-Release" },
+    { "name": "fw-Sim", "configurePreset": "fw-Sim" },
+    { "name": "tests", "configurePreset": "tests" }
+  ],
+
+  "testPresets": [
+    {
+      "name": "tests",
+      "configurePreset": "tests",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
 }

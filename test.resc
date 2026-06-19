@@ -1,5 +1,5 @@
 # Filename: renode-config.resc
-$bin = "C:/_git/renode_stm32/build/Debug/target/target.elf"
+$bin = "C:/_git/renode_stm32/build/fw-Sim/target/target.elf"
 
 # Create Machine & Load config
 mach create
@@ -16,6 +16,9 @@ macro reset
 """
 
 runMacro $reset
+
+emulation CreateServerSocketTerminal 12345 "term" false
+connector Connect sysbus.uart4 term
 
 machine StartGdbServer 1235 true
 start
