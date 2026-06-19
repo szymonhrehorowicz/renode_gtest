@@ -61,16 +61,6 @@ void Error_Handler(void);
 #define OSC_IN_GPIO_Port GPIOH
 #define OSC_OUT_Pin GPIO_PIN_1
 #define OSC_OUT_GPIO_Port GPIOH
-#define UART_TX_Pin GPIO_PIN_0
-#define UART_TX_GPIO_Port GPIOA
-#define UART_RX_Pin GPIO_PIN_1
-#define UART_RX_GPIO_Port GPIOA
-#define VBUS_SENSE_Pin GPIO_PIN_9
-#define VBUS_SENSE_GPIO_Port GPIOA
-#define USB_D_N_Pin GPIO_PIN_11
-#define USB_D_N_GPIO_Port GPIOA
-#define USB_D_P_Pin GPIO_PIN_12
-#define USB_D_P_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14

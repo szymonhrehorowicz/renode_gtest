@@ -38,6 +38,8 @@
         * Output
         * EVENT_OUT
         * EXTI
+     PB8   ------> CAN1_RX
+     PB9   ------> CAN1_TX
 */
 void MX_GPIO_Init(void)
 {
@@ -59,6 +61,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CAN_RX_Pin CAN_TX_Pin */
+  GPIO_InitStruct.Pin = CAN_RX_Pin|CAN_TX_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
