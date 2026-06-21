@@ -11,15 +11,16 @@
 
 #pragma once
 
+#include <boost/asio.hpp>
 #include <string>
-#include <winsock.h>
 
 namespace Renode::UART
 {
 
-SOCKET connect();
+using TcpSocket = boost::asio::ip::tcp::socket;
 
 bool wait_for_connection(int timeout_ms = 5000);
-std::string read_all_available(SOCKET sock);
+TcpSocket connect(boost::asio::io_context &io);
+std::string read_all_available(TcpSocket &sock);
 
 } // namespace Renode::UART

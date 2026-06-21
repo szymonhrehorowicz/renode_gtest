@@ -10,43 +10,40 @@
  */
 
 #include "renode.h"
+#include <boost/process.hpp>
 #include <stdexcept>
 #include <string>
-#include <windows.h>
 
 namespace Renode
 {
 
-static PROCESS_INFORMATION process;
+static boost::process::child process;
 
 void start()
 {
-    STARTUPINFOA si{};
-    si.cb = sizeof(si);
-
-    BOOL ok = CreateProcessA(nullptr, (LPSTR) "renode --disable-xwt test.resc", nullptr, nullptr, FALSE,
-                             CREATE_NO_WINDOW, nullptr, nullptr, &si, &process);
-
-    if (!ok)
+    try
     {
-        DWORD err = GetLastError();
-        throw std::runtime_error("Failed to start Renode, error: " + std::to_string(err));
+        process = boost::process::child("renode", "--disable-xwt", "test.resc",
+                                        boost::process::std_out > boost::process::null,
+                                        boost::process::std_err > boost::process::null);
+    }
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(std::string("Failed to start Renode: ") + e.what());
     }
 }
 
 void stop()
 {
-    TerminateProcess(process.hProcess, 0);
-    CloseHandle(process.hProcess);
-    CloseHandle(process.hThread);
+    if (process.running())
+    {
+        process.terminate();
+    }
 }
 
 bool is_running()
 {
-    DWORD code = 0;
-    if (GetExitCodeProcess(process.hProcess, &code))
-        return code == STILL_ACTIVE;
-    return false;
+    return process.running();
 }
 
 } // namespace Renode

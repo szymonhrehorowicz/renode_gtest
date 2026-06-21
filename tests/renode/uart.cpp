@@ -10,28 +10,13 @@
  */
 
 #include "uart.h"
-
 #include <chrono>
 #include <thread>
-#include <winsock.h>
 
 namespace Renode::UART
 {
 
-static constexpr int uart_port{12345};
-
-SOCKET connect()
-{
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(uart_port);
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    connect(sock, (sockaddr *)&addr, sizeof(addr));
-    return sock;
-}
+static constexpr int uart_port = 12345;
 
 bool wait_for_connection(int timeout_ms)
 {
@@ -39,55 +24,60 @@ bool wait_for_connection(int timeout_ms)
 
     while (true)
     {
-        SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
-
-        sockaddr_in addr{};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(uart_port);
-        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-        if (connect(s, (sockaddr *)&addr, sizeof(addr)) == 0)
+        try
         {
-            closesocket(s);
+            boost::asio::io_context io;
+            boost::asio::ip::tcp::socket sock(io);
+
+            boost::asio::ip::tcp::endpoint ep(boost::asio::ip::make_address("127.0.0.1"), uart_port);
+
+            sock.connect(ep);
             return true; // Renode is ready
         }
-
-        closesocket(s);
+        catch (...)
+        {
+            // Not ready yet
+        }
 
         if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(timeout_ms))
+        {
             return false;
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
-std::string read_all_available(SOCKET sock)
+TcpSocket connect(boost::asio::io_context &io)
+{
+    TcpSocket sock(io);
+
+    boost::asio::ip::tcp::endpoint ep(boost::asio::ip::make_address("127.0.0.1"), uart_port);
+
+    sock.connect(ep);
+    return sock;
+}
+
+std::string read_all_available(TcpSocket &sock)
 {
     std::string out;
-
-    // make socket non-blocking
-    u_long mode = 1;
-    ioctlsocket(sock, FIONBIO, &mode);
-
     char buf[256];
+
+    boost::system::error_code ec;
+
     while (true)
     {
-        int n = recv(sock, buf, sizeof(buf), 0);
-        if (n > 0)
+        std::size_t n = sock.read_some(boost::asio::buffer(buf), ec);
+
+        if (!ec && n > 0)
         {
             out.append(buf, n);
         }
         else
         {
-            if (WSAGetLastError() == WSAEWOULDBLOCK)
-                break; // no more data
-            break;     // other error
+            break; // no more data or error
         }
     }
-
-    // restore blocking mode
-    mode = 0;
-    ioctlsocket(sock, FIONBIO, &mode);
 
     return out;
 }

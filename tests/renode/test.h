@@ -13,6 +13,7 @@
 
 #include "renode.h"
 #include "uart.h"
+#include <boost/asio.hpp>
 #include <gtest/gtest.h>
 
 namespace Tests
@@ -22,25 +23,16 @@ class Renode_Test : public ::testing::Test
 {
     using Base = ::testing::Test;
 
+  protected:
+    boost::asio::io_context io;
+
   public:
-    static void SetUpTestSuite()
-    {
-        Base::SetUpTestSuite();
-        WSADATA wsa;
-        WSAStartup(MAKEWORD(2, 2), &wsa);
-    }
-
-    static void TearDownTestSuite()
-    {
-        WSACleanup();
-        Base::TearDownTestSuite();
-    }
-
     void SetUp() override
     {
         Base::SetUp();
 
         Renode::start();
+
         if (!Renode::UART::wait_for_connection())
             throw std::runtime_error("Renode did not open UART socket");
     }
@@ -48,7 +40,6 @@ class Renode_Test : public ::testing::Test
     void TearDown() override
     {
         Renode::stop();
-
         Base::TearDown();
     }
 };
